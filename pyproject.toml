@@ -1,7 +1,7 @@
 [project]
 name = "python-url-shortener"
 version = "0.1.0"
-description = "URL shortener sederhana pakai stdlib http.server untuk belajar Python"
+description = "A simple URL shortener built with the stdlib http.server while learning Python"
 requires-python = ">=3.11"
 
 [tool.pytest.ini_options]

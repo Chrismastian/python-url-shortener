@@ -10,7 +10,7 @@ from short import server
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
-    """Matikan auto-redirect biar 302 bisa ditangkap, bukan diikuti."""
+    """Disable auto-redirect so the 302 can be captured instead of followed."""
 
     def redirect_request(self, *args, **kwargs):
         return None
@@ -38,23 +38,23 @@ def request(method, url, payload=None):
 
 
 def test_shorten_then_redirect(base_url):
-    # kirim URL panjang
+    # send a long URL
     status, body = request("POST", f"{base_url}/shorten", {"url": "https://a.com"})
     assert status == 201
     code = body["code"]
 
-    # buka kode -> harus 302 + Location (JANGAN diikuti)
+    # open the code -> must be 302 + Location (do NOT follow)
     opener = urllib.request.build_opener(NoRedirect)
     try:
         opener.open(f"{base_url}/{code}")
-        assert False, "seharusnya redirect (302)"
+        assert False, "should have redirected (302)"
     except urllib.error.HTTPError as e:
         assert e.code == 302
         assert e.headers["Location"] == "https://a.com"
 
 
 def test_unknown_code_404(base_url):
-    status, _ = request("GET", f"{base_url}/tidakada")
+    status, _ = request("GET", f"{base_url}/missing")
     assert status == 404
 
 

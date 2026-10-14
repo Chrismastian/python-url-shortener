@@ -1,4 +1,4 @@
-"""Data layer: peta {kode: url} + simpan ke file JSON."""
+"""Data layer: {code: url} map + persist to a JSON file."""
 import json
 import secrets
 from pathlib import Path
@@ -17,12 +17,12 @@ def save(mapping, path=DATA_FILE):
 
 
 def new_code():
-    """Kode pendek acak, contoh: 'aB3xQw'."""
+    """Random short code, e.g. 'aB3xQw'."""
     return secrets.token_urlsafe(6)
 
 
 def shorten(mapping, url):
-    """Simpan url -> balikin kode. Kalau url sama sudah ada, pakai kode lama."""
+    """Store url -> return its code. If the same url already exists, reuse its code."""
     for code, existing in mapping.items():
         if existing == url:
             return code
@@ -32,5 +32,5 @@ def shorten(mapping, url):
 
 
 def get_url(mapping, code):
-    """Balikin url untuk kode, atau None kalau tidak ada."""
+    """Return the url for a code, or None if missing."""
     return mapping.get(code)

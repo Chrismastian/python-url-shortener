@@ -1,4 +1,4 @@
-"""HTTP layer: baca method+URL, panggil store, balas JSON / redirect."""
+"""HTTP layer: parse method+URL, call store, reply JSON / redirect."""
 import json
 import re
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -22,30 +22,30 @@ class Handler(BaseHTTPRequestHandler):
         return json.loads(self.rfile.read(length).decode("utf-8"))
 
     def _redirect(self, location):
-        # HINT (baris ~27): redirect itu balasan TANPA body.
+        # HINT (line ~27): a redirect is a response WITHOUT a body.
         self.send_response(302)
         self.send_header("Location", location)
         self.end_headers()
         pass
 
     def do_POST(self):
-        # Cuma layani POST /shorten, selain itu 404.
+        # Only serve POST /shorten; anything else is 404.
         if self.path != "/shorten":
             self._send(404, {"error": "not found"})
             return
  
         body = self._read_body()
         if not body or "url" not in body:
-            self._send(400, {"error": "butuh field 'url'"})
+            self._send(400, {"error": "missing 'url' field"})
             return
  
-        mapping = store.load()                       # baca data dari penyimpanan
-        code = store.shorten(mapping, body["url"])   # buat kode pendek
-        store.save(mapping)                          # simpan lagi
+        mapping = store.load()                       # read data from storage
+        code = store.shorten(mapping, body["url"])   # create the short code
+        store.save(mapping)                          # persist it
         self._send(201, {"code": code, "url": body["url"]})
 
     def do_GET(self):
-        # GET /<kode> -> redirect ke URL asli.
+        # GET /<code> -> redirect to the original URL.
         code = self.path.lstrip("/")                 # "/aB3xQw" -> "aB3xQw"
         if code == "":
             self._send(404, {"error": "not found"})
@@ -62,7 +62,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def run(port=8000):
     server = HTTPServer(("localhost", port), Handler)
-    print(f"Jalan di http://localhost:{port}")
+    print(f"Running at http://localhost:{port}")
     server.serve_forever()
 
 
